@@ -1434,6 +1434,8 @@
 </head>
 
 <body>
+    <!-- TIME WARP FLASH (Zaman Yolculuğu Parıltısı) -->
+    <div id="time-warp-flash" style="position:fixed; inset:0; background:white; opacity:0; pointer-events:none; z-index:9999; transition:opacity 0.4s;"></div>
 
     <!-- BAŞLANGIÇ EKRANI -->
     <div id="start-screen">
@@ -1506,6 +1508,7 @@
         <button class="exhibit-btn" onclick="openPOI('tunel')">🌊 Su Tünelleri (Sesli)</button>
         <button class="exhibit-btn" onclick="openPOI('bazilika')">⚖️ Bazilika (Sesli)</button>
         <button class="exhibit-btn" onclick="openPOI('su-kanali')">🏞️ Su Kanalı</button>
+        <button class="exhibit-btn" onclick="openPOI('yazit')">📜 Menekles Yazıtı</button>
 
         <div class="menu-sep"></div>
 
@@ -1605,6 +1608,16 @@
             <a-mixin id="rock-m" geometry="primitive:box;width:0.4;height:0.25;depth:0.4"
                 material="color:#b5b0a1;roughness:0.9"></a-mixin>
             <a-mixin id="grave-m" material="src: #grave-t; roughness: 0.9"></a-mixin>
+            <a-mixin id="grave-base-m" geometry="primitive:box;width:1.2;height:0.65;depth:2.5"
+                material="color:#efeee6;roughness:0.8"></a-mixin>
+            <a-mixin id="grave-head-m" geometry="primitive:box;width:0.6;height:2.4;depth:0.2"
+                material="color:#f5f4ef;roughness:0.9"></a-mixin>
+            <a-mixin id="grave-hat-m" geometry="primitive:cylinder;radius:0.3;height:0.45"
+                material="color:#f5f4ef;roughness:1"></a-mixin>
+            <a-mixin id="grave-hat-stem-m" geometry="primitive:cylinder;radius:0.1;height:0.2"
+                material="color:#e0ddd5;roughness:1"></a-mixin>
+            <a-mixin id="grave-soil-m" geometry="primitive:box;width:1.05;height:0.12;depth:2.25"
+                material="color:#4b3621;roughness:1"></a-mixin>
             <a-mixin id="grass-m" geometry="primitive:cone;radiusBottom:0.12;height:0.4"
                 material="color:#6e855a;roughness:1"></a-mixin>
             <a-mixin id="grass-patch-m" geometry="primitive:plane;width:12;height:12" rotation="-90 0 0"
@@ -1622,6 +1635,22 @@
         <a-light type="ambient" id="ambient-light" color="#fffaf0" intensity="0.75"></a-light>
         <a-light type="directional" id="dir-light" position="15 35 15" color="#fff" intensity="1.1"></a-light>
         <a-light type="hemisphere" color="#fff" groundColor="#8d7a64" intensity="0.65"></a-light>
+        
+        <!-- ANTIK REKONSTRÜKSIYON (Zaman Yolculuğu için) -->
+        <a-entity id="ancient-reconstruction" visible="false">
+             <!-- Beyaz, Yarı Şeffaf Hayalet Sütunlar -->
+             <a-entity position="0 6.5 0">
+                <a-cylinder position="-10 6 0" radius="0.4" height="12" material="color:#fff; opacity:0.3; shader:flat"></a-cylinder>
+                <a-cylinder position="-5 6 0" radius="0.4" height="12" material="color:#fff; opacity:0.3; shader:flat"></a-cylinder>
+                <a-cylinder position="0 6 0" radius="0.4" height="12" material="color:#fff; opacity:0.3; shader:flat"></a-cylinder>
+                <a-cylinder position="5 6 0" radius="0.4" height="12" material="color:#fff; opacity:0.3; shader:flat"></a-cylinder>
+                <a-cylinder position="10 6 0" radius="0.4" height="12" material="color:#fff; opacity:0.3; shader:flat"></a-cylinder>
+                <!-- Çatı Yapısı -->
+                <a-box position="0 12 0" width="22" height="0.5" depth="4" material="color:#fff; opacity:0.2"></a-box>
+             </a-entity>
+             <!-- Antik Zemin (Daha temiz mermer görünümü için placeholder) -->
+             <a-plane id="floor-ancient" position="0 6.83 0" rotation="-90 0 0" width="300" height="300" color="#e0e0e0" visible="false"></a-plane>
+        </a-entity>
 
         <a-entity id="camera-rig" position="0 8.5 25">
             <a-camera id="main-camera" wasd-controls="acceleration:65; fly:true; adEnabled:true"
@@ -1630,20 +1659,23 @@
             </a-camera>
         </a-entity>
 
-        <a-plane position="-80.5 6.82 0" rotation="-90 0 0" width="139" height="300" src="#zemin-t" repeat="20 40"
-            material="roughness:1" static-body></a-plane>
-        <a-plane position="80.5 6.82 0" rotation="-90 0 0" width="139" height="300" src="#zemin-t" repeat="20 40"
-            material="roughness:1" static-body></a-plane>
-        <a-plane position="0 6.82 -66" rotation="-90 0 0" width="22" height="168" src="#zemin-t" repeat="4 30"
-            material="roughness:1" static-body></a-plane>
-        <a-plane position="0 6.82 119" rotation="-90 0 0" width="22" height="62" src="#zemin-t" repeat="4 10"
-            material="roughness:1" static-body></a-plane>
-        <a-plane position="0 6.82 59" rotation="-90 0 0" width="10" height="58" src="#zemin-t" repeat="2 10"
-            material="roughness:1" static-body></a-plane>
-        <a-plane position="-7 6.82 24" rotation="-90 0 0" width="8" height="12" src="#zemin-t" repeat="2 3"
-            material="roughness:1" static-body></a-plane>
-        <a-plane position="7 6.82 24" rotation="-90 0 0" width="8" height="12" src="#zemin-t" repeat="2 3"
-            material="roughness:1" static-body></a-plane>
+        <!-- ZEMİNLER (Modern) -->
+        <a-entity id="floor-modern">
+            <a-plane position="-80.5 6.82 0" rotation="-90 0 0" width="139" height="300" src="#zemin-t" repeat="20 40"
+                material="roughness:1" static-body></a-plane>
+            <a-plane position="80.5 6.82 0" rotation="-90 0 0" width="139" height="300" src="#zemin-t" repeat="20 40"
+                material="roughness:1" static-body></a-plane>
+            <a-plane position="0 6.82 -66" rotation="-90 0 0" width="22" height="168" src="#zemin-t" repeat="4 30"
+                material="roughness:1" static-body></a-plane>
+            <a-plane position="0 6.82 119" rotation="-90 0 0" width="22" height="62" src="#zemin-t" repeat="4 10"
+                material="roughness:1" static-body></a-plane>
+            <a-plane position="0 6.82 59" rotation="-90 0 0" width="10" height="58" src="#zemin-t" repeat="2 10"
+                material="roughness:1" static-body></a-plane>
+            <a-plane position="-7 6.82 24" rotation="-90 0 0" width="8" height="12" src="#zemin-t" repeat="2 3"
+                material="roughness:1" static-body></a-plane>
+            <a-plane position="7 6.82 24" rotation="-90 0 0" width="8" height="12" src="#zemin-t" repeat="2 3"
+                material="roughness:1" static-body></a-plane>
+        </a-entity>
 
         <!-- Çimen kümeleri (Dağınık) -->
         <a-entity position="0 6.8 0">
@@ -1674,6 +1706,11 @@
 
         <!-- MERDİVEN -->
         <a-entity id="staircase">
+
+            <!-- ÜST SAHANLIK (Landing) -->
+            <a-box position="0 6.64 19.25" width="6" height="0.36" depth="2.5" color="#5c574f" static-body></a-box>
+            <a-box position="-3.1 7.2 20" width="0.2" height="1.2" depth="4" color="#6e6a5f"></a-box>
+            <a-box position="3.1 7.2 20" width="0.2" height="1.2" depth="4" color="#6e6a5f"></a-box>
 
             <a-plane position="-3.26 7.3 25" width="10" height="1" color="#1a1208" rotation="0 -90 0"></a-plane>
             <a-text position="-3.25 7.3 25" value="TUNELLERE INIS" align="center" color="#e8c87a" width="3"
@@ -1811,39 +1848,82 @@
                 </a-entity>
             </a-entity>
 
-            <!-- MEZARLARIN YENİ YERİ (Zemin Üzerinde) -->
+            <!-- MEZARLARIN YENİ YERİ (HEYBETLİ OSMANLI MEZARLIĞI) -->
             <a-entity position="71 0.05 79" rotation="0 180 0">
-                <a-box mixin="grave-m" position="-8 0.8 -6" width="0.5" height="1.6" depth="0.15"
-                    rotation="5 15 0"></a-box>
-                <a-box mixin="grave-m" position="-6 0.7 -5" width="0.4" height="1.4" depth="0.1"
-                    rotation="0 -10 0"></a-box>
-                <a-box mixin="grave-m" position="-4 1 -6" width="0.6" height="2" depth="0.2" rotation="-5 5 2"></a-box>
-                <a-box mixin="grave-m" position="4 1.1 -6" width="0.6" height="2.2" depth="0.15"
-                    rotation="-10 25 0"></a-box>
-                <a-box mixin="grave-m" position="-10 0.9 -1" width="0.4" height="1.8" depth="0.1"
-                    rotation="-5 12 0"></a-box>
-                <a-box mixin="grave-m" position="-2 1.1 -1.5" width="0.5" height="2.1" depth="0.15"
-                    rotation="8 -8 3"></a-box>
-                <a-box mixin="grave-m" position="2 0.8 -0.8" width="0.3" height="1.5" depth="0.1"
-                    rotation="0 18 -4"></a-box>
-                <a-box mixin="grave-m" position="8 1 -1.2" width="0.5" height="1.9" depth="0.12"
-                    rotation="-10 0 6"></a-box>
-                <a-box mixin="grave-m" position="-7 1 4" width="0.45" height="2.0" depth="0.14"
-                    rotation="12 15 0"></a-box>
-                <a-box mixin="grave-m" position="0 0.9 3.5" width="0.5" height="1.8" depth="0.15"
-                    rotation="-5 -12 2"></a-box>
-                <a-box mixin="grave-m" position="5 1.1 4.2" width="0.4" height="2.3" depth="0.1"
-                    rotation="18 10 -5"></a-box>
-                <a-box mixin="grave-m" position="10 0.8 3.8" width="0.6" height="1.6" depth="0.2"
-                    rotation="0 0 12"></a-box>
-                <a-box mixin="grave-m" position="-9 0.8 8" width="0.4" height="1.7" depth="0.1"
-                    rotation="-8 -20 0"></a-box>
-                <a-box mixin="grave-m" position="-3 1.2 7.5" width="0.55" height="2.4" depth="0.15"
-                    rotation="10 25 4"></a-box>
-                <a-box mixin="grave-m" position="3 0.9 8.2" width="0.45" height="1.9" depth="0.12"
-                    rotation="-15 5 -8"></a-box>
-                <a-box mixin="grave-m" position="7 1 8.5" width="0.5" height="2.1" depth="0.15"
-                    rotation="0 -18 2"></a-box>
+                <!-- Mezar 1 (Kavuklu - Büyük) -->
+                <a-entity position="-8 0 -6" rotation="0 15 0">
+                    <a-entity mixin="grave-base-m" position="0 0.3 0"></a-entity>
+                    <a-entity mixin="grave-soil-m" position="0 0.65 0"></a-entity>
+                    <a-entity mixin="grave-head-m" position="0 1.5 -1.05" rotation="-3 0 0"></a-entity>
+                    <a-entity mixin="grave-hat-stem-m" position="0 2.75 -1.05" rotation="-3 0 0"></a-entity>
+                    <a-entity mixin="grave-hat-m" position="0 3.05 -1.05" rotation="-3 0 0"></a-entity>
+                    <a-entity mixin="grave-head-m" position="0 0.8 1.05" scale="1 0.5 1"></a-entity>
+                </a-entity>
+                
+                <!-- Mezar 2 (İnce Şahide) -->
+                <a-entity position="-4 0 -5" rotation="0 -8 0">
+                    <a-entity mixin="grave-base-m" position="0 0.3 0" scale="0.9 1 0.9"></a-entity>
+                    <a-entity mixin="grave-soil-m" position="0 0.65 0" scale="0.9 1 0.9"></a-entity>
+                    <a-entity mixin="grave-head-m" position="0 1.5 -0.95" rotation="2 3 0" scale="0.8 1 1"></a-entity>
+                    <a-entity mixin="grave-hat-stem-m" position="0 2.7 -0.95" rotation="2 3 0"></a-entity>
+                    <a-entity mixin="grave-hat-m" position="0 3.0 -0.95" rotation="2 3 0" scale="0.8 0.9 1"></a-entity>
+                </a-entity>
+
+                <!-- Mezar 3 (Görkemli - Kavuklu) -->
+                <a-entity position="2 0 -6.5" rotation="0 20 0">
+                    <a-entity mixin="grave-base-m" position="0 0.3 0" scale="1.1 1.1 1.1"></a-entity>
+                    <a-entity mixin="grave-soil-m" position="0 0.65 0" scale="1.1 1 1.1"></a-entity>
+                    <a-entity mixin="grave-head-m" position="0 1.5 -1.05" rotation="-12 5 0"></a-entity>
+                    <a-entity mixin="grave-hat-stem-m" position="0 2.75 -1.05" rotation="-12 5 0"></a-entity>
+                    <a-entity mixin="grave-hat-m" position="0 3.05 -1.05" rotation="-12 5 0" scale="1.2 1.2 1.2"></a-entity>
+                </a-entity>
+
+                <!-- Mezar 4 (Eğik) -->
+                <a-entity position="7 0 -6" rotation="0 -12 0">
+                    <a-entity mixin="grave-base-m" position="0 0.3 0"></a-entity>
+                    <a-entity mixin="grave-soil-m" position="0 0.65 0"></a-entity>
+                    <a-entity mixin="grave-head-m" position="0 1.5 -1.05" rotation="5 -10 5"></a-entity>
+                    <a-entity mixin="grave-hat-stem-m" position="0 2.75 -1.05" rotation="5 -10 5"></a-entity>
+                    <a-entity mixin="grave-hat-m" position="0 3.05 -1.05" rotation="5 -10 5"></a-entity>
+                </a-entity>
+
+                <!-- Bağımsız Şahideler -->
+                <a-entity mixin="grave-head-m" position="-10 1.2 -1" rotation="-5 12 0" scale="0.9 1.1 1"></a-entity>
+                <a-entity mixin="grave-head-m" position="-2 1.2 -2.5" rotation="8 -8 3"></a-entity>
+                <a-entity mixin="grave-head-m" position="11 1.2 -3" rotation="-15 5 -10"></a-entity>
+
+                <!-- Mezar 5 (Dev Lahit) -->
+                <a-entity position="-1 0 4.5" rotation="0 5 0">
+                    <a-entity mixin="grave-base-m" position="0 0.3 0" scale="1.3 1.2 1.2"></a-entity>
+                    <a-entity mixin="grave-soil-m" position="0 0.65 0" scale="1.3 1 1.2"></a-entity>
+                    <a-entity mixin="grave-head-m" position="0 1.5 -1.1" rotation="-4 0 0" scale="1.1 1.1 1.2"></a-entity>
+                    <a-entity mixin="grave-hat-stem-m" position="0 2.8 -1.1" rotation="-4 0 0"></a-entity>
+                    <a-entity mixin="grave-hat-m" position="0 3.1 -1.1" rotation="-4 0 0" scale="1.4 1.3 1.4"></a-entity>
+                </a-entity>
+
+                <!-- Mezar 6 -->
+                <a-entity position="5 0 4.2" rotation="0 15 0">
+                    <a-entity mixin="grave-base-m" position="0 0.3 0"></a-entity>
+                    <a-entity mixin="grave-soil-m" position="0 0.65 0"></a-entity>
+                    <a-entity mixin="grave-head-m" position="0 1.5 -1.05"></a-entity>
+                    <a-entity mixin="grave-hat-stem-m" position="0 2.7 -1.05"></a-entity>
+                    <a-entity mixin="grave-hat-m" position="0 3.0 -1.05"></a-entity>
+                </a-entity>
+
+                <!-- Mezar 7 -->
+                <a-entity position="-6 0 8.5" rotation="0 -25 0">
+                    <a-entity mixin="grave-base-m" position="0 0.2 0" scale="1 0.7 1.1"></a-entity>
+                    <a-entity mixin="grave-soil-m" position="0 0.65 0" scale="1 1 1.1"></a-entity>
+                    <a-entity mixin="grave-head-m" position="0 1.2 -0.9" rotation="12 5 0" scale="1 0.8 1"></a-entity>
+                </a-entity>
+
+                <a-entity position="4 0 9.5" rotation="0 10 0">
+                    <a-entity mixin="grave-base-m" position="0 0.3 0"></a-entity>
+                    <a-entity mixin="grave-soil-m" position="0 0.65 0"></a-entity>
+                    <a-entity mixin="grave-head-m" position="0 1.5 -1.05" rotation="-10 8 0"></a-entity>
+                    <a-entity mixin="grave-hat-stem-m" position="0 2.75 -1.05" rotation="-10 8 0"></a-entity>
+                    <a-entity mixin="grave-hat-m" position="0 3.05 -1.05" rotation="-10 8 0" scale="1.1 1.1 1.1"></a-entity>
+                </a-entity>
             </a-entity>
             <a-entity position="42 0 36">
                 <!-- Gölge Planı -->
@@ -2052,10 +2132,10 @@
             { id: 'propylon', icon: '🚪', category: 'Anıtsal Giriş', title: 'Kemerli Kapı (Propylon)', desc: 'Izgara planlı olan Smyrna kentinin, doğu-batı yönlü paralel caddelerinden biri agoradan geçiyordu. Olasılıkla agorayı iki eşit parçaya bölen caddenin batı yandan agoraya giriş yaptığı yerde görkemli bir kapı bulunmaktadır.\n\nİki gözlü olduğu düşünülen kapının kuzey kemerinin merkezinde Roma İmparatoru Marcus Aurelius’un eşi Faustina’nın portre kabartması yer alır. Günümüzde kullanımda olan sokağın altında olan ikinci gözde ise olasılıkla Marcus Aurelius’un portresi yer almaktadır. bu iki isim, MS.178’de depremle yıkılan agorayı yeniden inşa ettirdiği için Smyrnalılar vefa borçlarını bu kapı ile ödemiştir.\n\n1940’lı yıllarda hatalı ölçülerle onarılan kemerli kapı 2004 yılında aslına uygun olarak yeniden restore edilmiştir.', facts: [{ label: 'Deprem Sonrası', val: 'MS 178' }, { label: 'Portreler', val: 'Faustina & Marcus Aurelius' }, { label: 'Restorasyon', val: '2004 (Aslına uygun)' }, { label: 'Şehir Planı', val: 'Izgara Plan' }], tags: ['Marcus Aurelius', 'Deprem Sonrası', 'Anıt', 'Kabartma'], world: { x: 56, y: 14, z: 41 }, turDurak: 2, image: 'propylon.png' },
             { id: 'kolonad', icon: '🏛️', category: 'Portiko', title: 'Batı Stoa', desc: 'Üç sıra sütun dizisiyle ayrılmış neflerden (galeri) oluşan batı stoa da bazilika gibi bir bodrum kat üzerinde yükselmekteydi. Günümüzde daha çok, kemerli bodrum katları görülen batı stoanın antik dönemde bodrum katı üzerinde yükselen iki katlı bir yapı olduğu anlaşılmaktadır.\n\nAvludan üç sıra basamakla çıkılan zemin kat ve ahşap tabanlı ikinci kat, Antik Çağ’da insanların yağmur ve güneşten korunarak gezinti yaptığı yerlerdi. Olasılıkla Roma Dönemi sonlarında bodrum kat galerilerinin bazı duvarları örülerek yapılan sarnıçlar bunun en güzel örneği olarak günümüze ulaşmıştır.\n\nBatı stoanın avluya bakan cephesindeki birinci kat sütunları, 1940’lı yıllarda ayağa kaldırılmıştır.', facts: [{ label: 'Yapı', val: 'İki Katlı' }, { label: 'Nef Sayısı', val: 'Üç Sıra Sütun' }, { label: 'Dönem', val: 'Roma Dönemi' }, { label: 'Özellik', val: 'Sarnıçlı Bodrum Kat' }], tags: ['Korint Düzeni', 'Ticaret', 'Siyaset', 'Portiko'], world: { x: 18, y: 18, z: 52 }, turDurak: 1, sound: 'AGORA_Sounds/stoa.mp3', image: 'bati_stoa.png' },
             { id: 'tunel', icon: '🌊', category: 'Alt Yapı', title: 'Graffitiler (Su Tünelleri)', desc: 'Roma Dönemi’ne ait duvar resimleri ve yazıları olan graffitiler bazilika bodrum katı duvar ve kemer ayaklarında yer alan sıvalar üzerine yapılmıştır. Demir ve Meşe Kökü karışımı bir mürekkeple çizilmiş olanlar dışında kazıma yöntemiyle yapılmış örnekler de vardır.\n\nGraffitiler, özellikle Roma dönemindeki günlük sosyal hayat konusunda çok önemli bilgiler vermektedir. Graffitilerde aşk oyunlarından gladyatör mücadelelerine, cinsellikten yelkenli resimlerine, sevgili adlarından kuşlara, gemilere, bilmecelere değin çok farklı konulara yer verildiği tespit edilmiştir. Roma Dönemi’nde Batı Anadolu’nun yıldızı parlayan üç kent, Pergamon, Ephesos ve Smyrna arasındaki rekabetin izleri bile bu duvarlarda görülmektedir.', facts: [{ label: 'Yöntem', val: 'Mürekkep ve Kazıma' }, { label: 'Malzeme', val: 'Demir ve Meşe Kökü' }, { label: 'Konular', val: 'Sosyal Hayat, Aşk, Mücadele' }, { label: 'Özgünlük', val: 'Dünyanın En Eski Örnekleri' }], tags: ['Altyapı', 'Su Sistemi', 'Graffiti', 'Dünya Rekoru'], world: { x: 2, y: 10, z: 22 }, turDurak: 5, sound: 'AGORA_Sounds/Grandfetolar.mp3', image: 'su_kanali.png' },
-            { id: 'mezarlik', icon: '⚰️', category: 'Osmanlı Dönemi', title: 'Osmanlı Mezarlığı', desc: 'Bizans ve Osmanlı dönemlerinde agora mezarlık olarak kullanıldı. 1932 kazılarıyla yeniden keşfedildi. Alandaki tarihi mezar taşları ve kabristan, İzmir\'in katmanlı tarihini gözler önüne sermektedir.', facts: [{ label: 'Dönem', val: '18–19. yüzyıl' }, { label: 'Mezar Taşları', val: 'Arap harfli yazıtlar' }, { label: 'Kazı Başlangıcı', val: '1932' }, { label: 'Özellik', val: 'Kabartma çiçek desenleri' }], tags: ['Osmanlı', '19. Yüzyıl', 'Kazı', 'Katmanlı Tarih'], world: { x: 63, y: 12, z: 80 }, turDurak: 3, image: 'kabristan.png' },
+            { id: 'mezarlik', icon: '⚰️', category: 'Osmanlı Dönemi', title: 'Osmanlı Mezarlığı (Sesli)', desc: 'Bizans ve Osmanlı dönemlerinde agora mezarlık olarak kullanıldı. 1932 kazılarıyla yeniden keşfedildi. Alandaki tarihi mezar taşları ve kabristan, İzmir\'in katmanlı tarihini gözler önüne sermektedir.', facts: [{ label: 'Dönem', val: '18–19. yüzyıl' }, { label: 'Mezar Taşları', val: 'Arap harfli yazıtlar' }, { label: 'Kazı Başlangıcı', val: '1932' }, { label: 'Özellik', val: 'Kabartma çiçek desenleri' }], tags: ['Osmanlı', '19. Yüzyıl', 'Kazı', 'Katmanlı Tarih'], world: { x: 63, y: 12, z: 80 }, turDurak: 3, image: 'kabristan.png', sound: 'AGORA_Sounds/kabirstan1.mp3' },
             { id: 'cesme', icon: '💧', category: 'Su Yapısı', title: 'Antik Çeşme (Nymphaeum)', desc: 'MS 2. yüzyıldan bu yana suyun aktığı bu çeşme, hem içme suyu hem de sosyal toplanma mekânı işlevi gördü.', facts: [{ label: 'Dönem', val: 'MS 2. yüzyıl' }, { label: 'Tür', val: 'Nymphaeum (çeşme anıtı)' }, { label: 'İşlev', val: 'İçme suyu ve sosyal alan' }, { label: 'Sistem', val: 'Tünel-sarnıç-çeşme ağı' }], tags: ['Hidrolik', 'Nymphaeum', 'Sosyal Alan', 'Roma'], world: { x: 8, y: 3, z: 85 }, turDurak: 6, image: 'cesme.png' },
             { id: 'kusyuvasi', icon: '🐦', category: 'Doğa & Tarih', title: 'Martı Yuvası', desc: 'Antik sütunların arasına kurulmuş martı yuvası. İzmir körfezi martıları 2000 yıldır bu taşların arasında yuvalanıyor.', facts: [{ label: 'Tür', val: 'Akdeniz Martısı' }, { label: 'Süreklilik', val: '2000+ year' }, { label: 'Konum', val: 'Batı Stoa sütunları' }, { label: 'Kayıt', val: 'Roma dönemi şiirlerinde' }], tags: ['Fauna', 'Süreklilik', 'Martı', 'Antik Hayvan'], world: { x: 18, y: 20, z: 57 }, turDurak: 0 },
-            { id: 'yazit', icon: '📜', category: 'Yazıt', title: 'Menekles Yazıtı', desc: 'İyi talihle. Güzellik ve büyüklükte Asia’nın birincisi ve en ünlü şehri, başkent, en kutsal meclisin (Roma Senatosu) kararı uyarınca üç kere neokoros olan şehir, İona’nın süsü Smyrna, onun sevgili vatanı, keskin silahlarla yapılan dövüşleri içeren ve ardarda beş gün süren gladyatör oyunlarını düzenlemiş olan, Asia’daki impatorluk kültünün başrahibi Iulius Menekles Diaphantos onurlandırıldı. Yazıtın orijinal metni:\n\nΙΟΥΛΙΟΝ\nΜΕΝΕΚΛΕΑ\nΔΙΟΦΑΝΤΟΥ\nΑΣΙΑΡΧΗΝ\nΕΝΔΟΞΩΣ ΦΙΛΟΤΕΙΜΗΣΑΜΕΝΟΝ\nΕΣ ΗΜΕΡΩΝ ΠΕΝΤΕ\nΤΟΥΣ ΟΞΕΣΙΝ\nΗ ΓΛΥΚΥΤΑΤΗ ΠΑΤΡΙΣ', facts: [{ label: 'onurlandırılan', val: 'Iulius Menekles' }, { label: 'Unvan', val: 'Asia Başrahibi' }, { label: 'Dönem', val: 'Roma Dönemi' }, { label: 'Etkinlik', val: 'Gladyatör Oyunları' }], tags: ['Yazıt', 'Gladyatör', 'Smyrna', 'Onurlandırma'], world: { x: 1, y: 2, z: 68 }, turDurak: -1 },
+            { id: 'yazit', icon: '📜', category: 'Yazıt', title: 'Menekles Yazıtı', desc: 'İyi talihle. Güzellik ve büyüklükte Asia’nın birincisi ve en ünlü şehri, başkent, en kutsal meclisin (Roma Senatosu) kararı uyarınca üç kere neokoros olan şehir, İona’nın süsü Smyrna, onun sevgili vatanı, keskin silahlarla yapılan dövüşleri içeren ve ardarda beş gün süren gladyatör oyunlarını düzenlemiş olan, Asia’daki impatorluk kültünün başrahibi Iulius Menekles Diaphantos onurlandırıldı. Yazıtın orijinal metni:\n\nΙΟΥΛΙΟΝ\nΜΕΝΕΚΛΕΑ\nΔΙΟΦΑΝΤΟΥ\nΑΣΙΑΡΧΗΝ\nΕΝΔΟΞΩΣ ΦΙΛΟΤΕΙΜΗΣΑΜΕΝΟΝ\nΕΣ ΗΜΕΡΩΝ ΠΕΝΤΕ\nΤΟΥΣ ΟΞΕΣΙΝ\nΗ ΓΛΥΚΥΤΑΤΗ ΠΑΤΡΙΣ', facts: [{ label: 'onurlandırılan', val: 'Iulius Menekles' }, { label: 'Unvan', val: 'Asia Başrahibi' }, { label: 'Dönem', val: 'Roma Dönemi' }, { label: 'Etkinlik', val: 'Gladyatör Oyunları' }], tags: ['Yazıt', 'Gladyatör', 'Smyrna', 'Onurlandırma'], world: { x: 1, y: 2, z: 68 }, turDurak: -1, image: 'menekles.png' },
             { id: 'kopru', icon: '🌉', category: 'Mimari', title: 'Antik Köprü', desc: 'Agoranın su kanalları ve tünel girişleri arasında bağlantı sağlayan taş kemerli köprü.', facts: [{ label: 'Malzeme', val: 'Kesme Taş' }, { label: 'Tür', val: 'Kemerli Köprü' }, { label: 'Dönem', val: 'Roma Dönemi' }], tags: ['Mimari', 'Ulaşım', 'Mühendislik'], world: { x: 24, y: 12, z: 83 }, turDurak: -1 },
             { id: 'su-kanali', icon: '🏞️', category: 'Hidroloji', title: 'Su Kanalı', desc: 'Tüneller boyunca uzanan bu kanal Roma döneminde şehrin su dağıtım ağının temel bileşeniydi.', facts: [{ label: 'Uzunluk', val: '~50 metre (görünen)' }, { label: 'İnşa', val: 'MS 2. yüzyıl' }, { label: 'Bağlantı', val: 'Yeraltı sarnıçları' }, { label: 'Malzeme', val: 'Taş ve kireç harcı' }], tags: ['Hidrolik', 'Mühendislik', 'Su', 'Roma'], world: { x: 8, y: 3, z: 58 }, turDurak: -1, image: 'gercek_su_kanali.png' },
         ];
