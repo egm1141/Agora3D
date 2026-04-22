@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Agora Müze Gezisi</title>
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js?v=force"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap');
@@ -1435,7 +1436,9 @@
 
 <body>
     <!-- TIME WARP FLASH (Zaman Yolculuğu Parıltısı) -->
-    <div id="time-warp-flash" style="position:fixed; inset:0; background:white; opacity:0; pointer-events:none; z-index:9999; transition:opacity 0.4s;"></div>
+    <div id="time-warp-flash"
+        style="position:fixed; inset:0; background:white; opacity:0; pointer-events:none; z-index:9999; transition:opacity 0.4s;">
+    </div>
 
     <!-- BAŞLANGIÇ EKRANI -->
     <div id="start-screen">
@@ -1594,7 +1597,8 @@
     <!-- =================== SAHNE =================== -->
     <a-scene vr-mode-ui="enabled:false" loading-screen="enabled:false"
         physics="debug: false; gravity: -9.8; friction: 0.1; restitution: 0.5;"
-        renderer="antialias:true; colorManagement:true; physicallyCorrectLights:true; logarithmicDepthBuffer:true;">
+        shadow="type: pcfsoft"
+        renderer="antialias:true; colorManagement:true; physicallyCorrectLights:true; logarithmicDepthBuffer:true; shadowMapEnabled: true;">
         <a-assets timeout="7000">
             <!-- Dokular -->
 
@@ -1624,35 +1628,188 @@
                 material="src:#grass-t;repeat:4 4;roughness:1;transparent:true;opacity:0.9"></a-mixin>
             <!-- Mimari Mixin'ler -->
             <a-mixin id="stone-block-m" geometry="primitive:box;width:1.95;height:0.95;depth:1.95"
-                material="color:#9a9587;roughness:0.9"></a-mixin>
+                material="color:#9a9587;roughness:0.9" shadow="cast: true; receive: true"></a-mixin>
             <a-mixin id="detail-m" geometry="primitive:box;width:1.1;height:0.2;depth:1.1"
-                material="color:#858074;roughness:1"></a-mixin>
+                material="color:#858074;roughness:1" shadow="cast: true; receive: true"></a-mixin>
+            <a-mixin id="cloud-m" geometry="primitive:sphere;radius:10"
+                material="color:#ffffff;opacity:0.35;transparent:true;shader:flat"></a-mixin>
         </a-assets>
 
         <!-- Sahne Temelleri -->
 
         <a-sky id="main-sky" color="#a0c4ff"></a-sky>
-        <a-light type="ambient" id="ambient-light" color="#fffaf0" intensity="0.75"></a-light>
-        <a-light type="directional" id="dir-light" position="15 35 15" color="#fff" intensity="1.1"></a-light>
-        <a-light type="hemisphere" color="#fff" groundColor="#8d7a64" intensity="0.65"></a-light>
-        
-        <!-- ANTIK REKONSTRÜKSIYON (Zaman Yolculuğu için) -->
-        <a-entity id="ancient-reconstruction" visible="false">
-             <!-- Beyaz, Yarı Şeffaf Hayalet Sütunlar -->
-             <a-entity position="0 6.5 0">
-                <a-cylinder position="-10 6 0" radius="0.4" height="12" material="color:#fff; opacity:0.3; shader:flat"></a-cylinder>
-                <a-cylinder position="-5 6 0" radius="0.4" height="12" material="color:#fff; opacity:0.3; shader:flat"></a-cylinder>
-                <a-cylinder position="0 6 0" radius="0.4" height="12" material="color:#fff; opacity:0.3; shader:flat"></a-cylinder>
-                <a-cylinder position="5 6 0" radius="0.4" height="12" material="color:#fff; opacity:0.3; shader:flat"></a-cylinder>
-                <a-cylinder position="10 6 0" radius="0.4" height="12" material="color:#fff; opacity:0.3; shader:flat"></a-cylinder>
-                <!-- Çatı Yapısı -->
-                <a-box position="0 12 0" width="22" height="0.5" depth="4" material="color:#fff; opacity:0.2"></a-box>
-             </a-entity>
-             <!-- Antik Zemin (Daha temiz mermer görünümü için placeholder) -->
-             <a-plane id="floor-ancient" position="0 6.83 0" rotation="-90 0 0" width="300" height="300" color="#e0e0e0" visible="false"></a-plane>
+
+        <!-- CELESTIAL BODIES (Güneş ve Ay) -->
+        <a-entity id="celestial-container">
+            <!-- Güneş -->
+            <a-entity id="sun" position="0 150 0" visible="true">
+                <a-sphere radius="12" material="shader:flat; color:#fff5d0"></a-sphere>
+                <a-sphere radius="20" material="shader:flat; color:#ffcc00; opacity:0.3; transparent:true"
+                    animation="property:scale; from:1 1 1; to:1.2 1.2 1.2; dur:2000; dir:alternate; loop:true"></a-sphere>
+            </a-entity>
+            <!-- Ay -->
+            <a-entity id="moon" position="40 120 -60" visible="false">
+                <a-sphere radius="8" material="shader:flat; color:#f0f0ff"></a-sphere>
+                <a-sphere radius="15" material="shader:flat; color:#8080ff; opacity:0.1; transparent:true"></a-sphere>
+                <a-light type="point" color="#a0c4ff" intensity="40" distance="150"></a-light>
+            </a-entity>
         </a-entity>
 
-        <a-entity id="camera-rig" position="0 8.5 25">
+        <a-light type="ambient" id="ambient-light" color="#fffaf0" intensity="0.75"></a-light>
+        <a-light type="directional" id="dir-light" position="15 35 15" color="#fff" intensity="1.1"
+            castShadow="true" 
+            shadow-camera-left="-100" shadow-camera-right="100" 
+            shadow-camera-top="100" shadow-camera-bottom="-100"
+            shadow-map-width="2048" shadow-map-height="2048"></a-light>
+        <a-light type="hemisphere" color="#fff" groundColor="#8d7a64" intensity="0.65"></a-light>
+
+        <!-- GECE AYDINLATMASI (Geliştirilmiş Müze Spotları) -->
+        <a-entity id="night-lights" visible="false">
+            <!-- Faustina Kapısı Aydınlatması -->
+            <a-entity position="22 1 88">
+                <a-sphere radius="0.3" material="shader:flat; color:#ffd27d"></a-sphere>
+                <a-light type="point" color="#ffd27d" intensity="40" distance="60" castShadow="false"></a-light>
+            </a-entity>
+            <a-entity position="22 8 83">
+                <a-light type="point" color="#ffd27d" intensity="40" distance="40"></a-light>
+            </a-entity>
+            
+            <!-- Batı Stoa ve Sütunlar -->
+            <a-entity position="18 6 30">
+                <a-sphere radius="0.2" material="shader:flat; color:#ffcc88"></a-sphere>
+                <a-light type="point" color="#ffcc88" intensity="40" distance="50"></a-light>
+            </a-entity>
+            <a-entity position="18 6 55">
+                <a-sphere radius="0.2" material="shader:flat; color:#ffcc88"></a-sphere>
+                <a-light type="point" color="#ffcc88" intensity="40" distance="50"></a-light>
+            </a-entity>
+            <a-entity position="18 6 80">
+                <a-sphere radius="0.2" material="shader:flat; color:#ffcc88"></a-sphere>
+                <a-light type="point" color="#ffcc88" intensity="40" distance="50"></a-light>
+            </a-entity>
+
+            <!-- Kabristan Aydınlatması -->
+            <a-entity position="63 3 80">
+                <a-sphere radius="0.25" material="shader:flat; color:#a0c4ff"></a-sphere>
+                <a-light type="point" color="#a0c4ff" intensity="40" distance="45"></a-light>
+            </a-entity>
+            
+            <!-- Propylon ve Giriş -->
+            <a-entity position="48 5 41">
+                <a-light type="point" color="#ffd27d" intensity="40" distance="70"></a-light>
+            </a-entity>
+            
+            <!-- Bazilika Girişleri ve Uzunluğu -->
+            <a-entity position="0 4 0">
+                <a-light type="point" color="#fff" intensity="40" distance="50"></a-light>
+            </a-entity>
+            <a-entity position="0 4 40">
+                <a-light type="point" color="#fff" intensity="40" distance="50"></a-light>
+            </a-entity>
+            <a-entity position="0 4 -40">
+                <a-light type="point" color="#fff" intensity="40" distance="50"></a-light>
+            </a-entity>
+
+            <!-- Orta Meydan (Courtyard) Aydınlatması -->
+            <a-entity position="35 2 20">
+                <a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere>
+                <a-light type="point" color="#ffddaa" intensity="40" distance="60"></a-light>
+            </a-entity>
+            <a-entity position="35 2 60">
+                <a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere>
+                <a-light type="point" color="#ffddaa" intensity="40" distance="60"></a-light>
+            </a-entity>
+
+            <!-- Kullanıcı Özel Işıkları (User Defined Points) -->
+            <a-entity position="73 9 81"><a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere><a-light type="point" color="#ffddaa" intensity="40" distance="50"></a-light></a-entity>
+            <a-entity position="62 10 52"><a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere><a-light type="point" color="#ffddaa" intensity="40" distance="50"></a-light></a-entity>
+            <a-entity position="62 8 23"><a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere><a-light type="point" color="#ffddaa" intensity="40" distance="50"></a-light></a-entity>
+            <a-entity position="47 7 22"><a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere><a-light type="point" color="#ffddaa" intensity="40" distance="50"></a-light></a-entity>
+            <a-entity position="20 8 22"><a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere><a-light type="point" color="#ffddaa" intensity="40" distance="50"></a-light></a-entity>
+            <a-entity position="20 9 34"><a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere><a-light type="point" color="#ffddaa" intensity="40" distance="50"></a-light></a-entity>
+            <a-entity position="20 9 54"><a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere><a-light type="point" color="#ffddaa" intensity="40" distance="50"></a-light></a-entity>
+            <a-entity position="19 9 74"><a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere><a-light type="point" color="#ffddaa" intensity="40" distance="50"></a-light></a-entity>
+            <a-entity position="52 14 90"><a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere><a-light type="point" color="#ffddaa" intensity="40" distance="50"></a-light></a-entity>
+            <a-entity position="28 14 90"><a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere><a-light type="point" color="#ffddaa" intensity="40" distance="50"></a-light></a-entity>
+            <a-entity position="7 8 88"><a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere><a-light type="point" color="#ffddaa" intensity="40" distance="50"></a-light></a-entity>
+            <a-entity position="-8 8 88"><a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere><a-light type="point" color="#ffddaa" intensity="40" distance="50"></a-light></a-entity>
+            <a-entity position="27 10 71"><a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere><a-light type="point" color="#ffddaa" intensity="40" distance="50"></a-light></a-entity>
+            <a-entity position="52 10 71"><a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere><a-light type="point" color="#ffddaa" intensity="40" distance="50"></a-light></a-entity>
+            <a-entity position="-12 8 56"><a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere><a-light type="point" color="#ffddaa" intensity="40" distance="50"></a-light></a-entity>
+            <a-entity position="-12 8 30"><a-sphere radius="0.2" material="shader:flat; color:#ffddaa"></a-sphere><a-light type="point" color="#ffddaa" intensity="40" distance="50"></a-light></a-entity>
+        </a-entity>
+
+        <!-- BULUTLAR (Garantili Hareketli Bulut Sistemi) -->
+        <a-entity id="clouds-container" position="0 0 0" visible="true">
+            <a-entity position="-180 110 -150" cloud-drift="speed: 4; range: 60; offset: 0">
+                <a-entity mixin="cloud-m" scale="4 0.5 2.5"></a-entity>
+                <a-entity mixin="cloud-m" position="15 0 8" scale="2.5 0.4 1.8"></a-entity>
+                <a-entity mixin="cloud-m" position="-12 1 -5" scale="2.2 0.3 1.5"></a-entity>
+            </a-entity>
+            <a-entity position="130 120 160" cloud-drift="speed: 4; range: 50; offset: 2">
+                <a-entity mixin="cloud-m" scale="3 0.8 3"></a-entity>
+                <a-entity mixin="cloud-m" position="5 3 -2" scale="2 0.6 2"></a-entity>
+                <a-entity mixin="cloud-m" position="-4 -2 3" scale="2.5 0.5 2.5"></a-entity>
+            </a-entity>
+            <a-entity position="-90 95 190" cloud-drift="speed: 4; range: 40; offset: 4">
+                <a-entity mixin="cloud-m" scale="1.5 0.4 1.2"></a-entity>
+                <a-entity mixin="cloud-m" position="10 0 5" scale="1.2 0.3 1"></a-entity>
+            </a-entity>
+            <a-entity position="170 105 -100" cloud-drift="speed: 4; range: 80; offset: 1.5">
+                <a-entity mixin="cloud-m" scale="5 0.3 1.5"></a-entity>
+                <a-entity mixin="cloud-m" position="-20 0 2" scale="4 0.2 1.2"></a-entity>
+            </a-entity>
+            <a-entity position="-50 85 -200" cloud-drift="speed: 4; range: 70; offset: 3">
+                <a-entity mixin="cloud-m" scale="3.5 0.7 2.2"></a-entity>
+                <a-entity mixin="cloud-m" position="14 0 10" scale="2.8 0.6 1.8"></a-entity>
+                <a-entity mixin="cloud-m" position="-15 2 -8" scale="2.2 0.5 1.5"></a-entity>
+            </a-entity>
+            <a-entity position="200 115 40" cloud-drift="speed: 4; range: 50; offset: 5">
+                <a-entity mixin="cloud-m" scale="2.5 0.5 2.5"></a-entity>
+                <a-entity mixin="cloud-m" position="12 4 -6" scale="1.8 0.4 1.8"></a-entity>
+            </a-entity>
+            <a-entity position="-220 130 20" cloud-drift="speed: 4; range: 90; offset: 1">
+                <a-entity mixin="cloud-m" scale="6 0.8 4"></a-entity>
+                <a-entity mixin="cloud-m" position="20 5 -10" scale="4 0.6 3"></a-entity>
+                <a-entity mixin="cloud-m" position="-25 -2 15" scale="3.5 0.5 2.5"></a-entity>
+            </a-entity>
+            <a-entity position="-150 90 220" cloud-drift="speed: 4; range: 60; offset: 2.5">
+                <a-entity mixin="cloud-m" scale="3 0.4 2"></a-entity>
+                <a-entity mixin="cloud-m" position="-10 0 -10" scale="2 0.3 1.5"></a-entity>
+            </a-entity>
+            <a-entity position="180 95 -220" cloud-drift="speed: 4; range: 75; offset: 0.5">
+                <a-entity mixin="cloud-m" scale="4 0.5 3"></a-entity>
+                <a-entity mixin="cloud-m" position="15 0 12" scale="3 0.4 2"></a-entity>
+            </a-entity>
+            <a-entity position="30 140 -50" cloud-drift="speed: 4; range: 50; offset: 3.5">
+                <a-entity mixin="cloud-m" scale="2.5 0.3 2"></a-entity>
+                <a-entity mixin="cloud-m" position="-8 2 4" scale="1.5 0.2 1.5"></a-entity>
+            </a-entity>
+        </a-entity>
+
+        <!-- ANTIK REKONSTRÜKSIYON (Zaman Yolculuğu için) -->
+        <a-entity id="ancient-reconstruction" visible="false">
+            <!-- Beyaz, Yarı Şeffaf Hayalet Sütunlar -->
+            <a-entity position="0 6.5 0">
+                <a-cylinder position="-10 6 0" radius="0.4" height="12"
+                    material="color:#fff; opacity:0.3; shader:flat"></a-cylinder>
+                <a-cylinder position="-5 6 0" radius="0.4" height="12"
+                    material="color:#fff; opacity:0.3; shader:flat"></a-cylinder>
+                <a-cylinder position="0 6 0" radius="0.4" height="12"
+                    material="color:#fff; opacity:0.3; shader:flat"></a-cylinder>
+                <a-cylinder position="5 6 0" radius="0.4" height="12"
+                    material="color:#fff; opacity:0.3; shader:flat"></a-cylinder>
+                <a-cylinder position="10 6 0" radius="0.4" height="12"
+                    material="color:#fff; opacity:0.3; shader:flat"></a-cylinder>
+                <!-- Çatı Yapısı -->
+                <a-box position="0 12 0" width="22" height="0.5" depth="4" material="color:#fff; opacity:0.2"></a-box>
+            </a-entity>
+            <!-- Antik Zemin (Daha temiz mermer görünümü için placeholder) -->
+            <a-plane id="floor-ancient" position="0 6.83 0" rotation="-90 0 0" width="300" height="300" color="#e0e0e0"
+                visible="false"></a-plane>
+        </a-entity>
+
+        <a-entity id="camera-rig" position="42 12 73">
             <a-camera id="main-camera" wasd-controls="acceleration:65; fly:true; adEnabled:true"
                 look-controls="pointerLockEnabled:true">
                 <a-cursor fuse="false" raycaster="objects:.clickable" color="#e8c87a"></a-cursor>
@@ -1662,19 +1819,19 @@
         <!-- ZEMİNLER (Modern) -->
         <a-entity id="floor-modern">
             <a-plane position="-80.5 6.82 0" rotation="-90 0 0" width="139" height="300" src="#zemin-t" repeat="20 40"
-                material="roughness:1" static-body></a-plane>
+                material="roughness:1" static-body shadow="receive: true"></a-plane>
             <a-plane position="80.5 6.82 0" rotation="-90 0 0" width="139" height="300" src="#zemin-t" repeat="20 40"
-                material="roughness:1" static-body></a-plane>
+                material="roughness:1" static-body shadow="receive: true"></a-plane>
             <a-plane position="0 6.82 -66" rotation="-90 0 0" width="22" height="168" src="#zemin-t" repeat="4 30"
-                material="roughness:1" static-body></a-plane>
+                material="roughness:1" static-body shadow="receive: true"></a-plane>
             <a-plane position="0 6.82 119" rotation="-90 0 0" width="22" height="62" src="#zemin-t" repeat="4 10"
-                material="roughness:1" static-body></a-plane>
+                material="roughness:1" static-body shadow="receive: true"></a-plane>
             <a-plane position="0 6.82 59" rotation="-90 0 0" width="10" height="58" src="#zemin-t" repeat="2 10"
-                material="roughness:1" static-body></a-plane>
+                material="roughness:1" static-body shadow="receive: true"></a-plane>
             <a-plane position="-7 6.82 24" rotation="-90 0 0" width="8" height="12" src="#zemin-t" repeat="2 3"
-                material="roughness:1" static-body></a-plane>
+                material="roughness:1" static-body shadow="receive: true"></a-plane>
             <a-plane position="7 6.82 24" rotation="-90 0 0" width="8" height="12" src="#zemin-t" repeat="2 3"
-                material="roughness:1" static-body></a-plane>
+                material="roughness:1" static-body shadow="receive: true"></a-plane>
         </a-entity>
 
         <!-- Çimen kümeleri (Dağınık) -->
@@ -1859,7 +2016,7 @@
                     <a-entity mixin="grave-hat-m" position="0 3.05 -1.05" rotation="-3 0 0"></a-entity>
                     <a-entity mixin="grave-head-m" position="0 0.8 1.05" scale="1 0.5 1"></a-entity>
                 </a-entity>
-                
+
                 <!-- Mezar 2 (İnce Şahide) -->
                 <a-entity position="-4 0 -5" rotation="0 -8 0">
                     <a-entity mixin="grave-base-m" position="0 0.3 0" scale="0.9 1 0.9"></a-entity>
@@ -1875,7 +2032,8 @@
                     <a-entity mixin="grave-soil-m" position="0 0.65 0" scale="1.1 1 1.1"></a-entity>
                     <a-entity mixin="grave-head-m" position="0 1.5 -1.05" rotation="-12 5 0"></a-entity>
                     <a-entity mixin="grave-hat-stem-m" position="0 2.75 -1.05" rotation="-12 5 0"></a-entity>
-                    <a-entity mixin="grave-hat-m" position="0 3.05 -1.05" rotation="-12 5 0" scale="1.2 1.2 1.2"></a-entity>
+                    <a-entity mixin="grave-hat-m" position="0 3.05 -1.05" rotation="-12 5 0"
+                        scale="1.2 1.2 1.2"></a-entity>
                 </a-entity>
 
                 <!-- Mezar 4 (Eğik) -->
@@ -1896,9 +2054,11 @@
                 <a-entity position="-1 0 4.5" rotation="0 5 0">
                     <a-entity mixin="grave-base-m" position="0 0.3 0" scale="1.3 1.2 1.2"></a-entity>
                     <a-entity mixin="grave-soil-m" position="0 0.65 0" scale="1.3 1 1.2"></a-entity>
-                    <a-entity mixin="grave-head-m" position="0 1.5 -1.1" rotation="-4 0 0" scale="1.1 1.1 1.2"></a-entity>
+                    <a-entity mixin="grave-head-m" position="0 1.5 -1.1" rotation="-4 0 0"
+                        scale="1.1 1.1 1.2"></a-entity>
                     <a-entity mixin="grave-hat-stem-m" position="0 2.8 -1.1" rotation="-4 0 0"></a-entity>
-                    <a-entity mixin="grave-hat-m" position="0 3.1 -1.1" rotation="-4 0 0" scale="1.4 1.3 1.4"></a-entity>
+                    <a-entity mixin="grave-hat-m" position="0 3.1 -1.1" rotation="-4 0 0"
+                        scale="1.4 1.3 1.4"></a-entity>
                 </a-entity>
 
                 <!-- Mezar 6 -->
@@ -1922,7 +2082,8 @@
                     <a-entity mixin="grave-soil-m" position="0 0.65 0"></a-entity>
                     <a-entity mixin="grave-head-m" position="0 1.5 -1.05" rotation="-10 8 0"></a-entity>
                     <a-entity mixin="grave-hat-stem-m" position="0 2.75 -1.05" rotation="-10 8 0"></a-entity>
-                    <a-entity mixin="grave-hat-m" position="0 3.05 -1.05" rotation="-10 8 0" scale="1.1 1.1 1.1"></a-entity>
+                    <a-entity mixin="grave-hat-m" position="0 3.05 -1.05" rotation="-10 8 0"
+                        scale="1.1 1.1 1.1"></a-entity>
                 </a-entity>
             </a-entity>
             <a-entity position="42 0 36">
@@ -1975,11 +2136,11 @@
                 <a-entity mixin="rock-m" position="-6 0 -12" rotation="-10 20 5" scale="1.5 0.5 1.5"></a-entity>
 
                 <a-mixin id="col-m" geometry="primitive:cylinder;radius:0.4;height:10"
-                    material="src:#marble-t;color:#cfc9ba;roughness:0.8;repeat:2 8"></a-mixin>
+                    material="src:#marble-t;color:#cfc9ba;roughness:0.8;repeat:2 8" shadow="cast: true; receive: true"></a-mixin>
                 <a-mixin id="base-m" geometry="primitive:box;width:1.1;height:0.6;depth:1.1"
-                    material="src:#marble-t;color:#9c9990;roughness:0.9;repeat:1 1"></a-mixin>
+                    material="src:#marble-t;color:#9c9990;roughness:0.9;repeat:1 1" shadow="cast: true; receive: true"></a-mixin>
                 <a-mixin id="cap-m" geometry="primitive:box;width:1;height:0.8;depth:1"
-                    material="src:#marble-t;color:#b5b1a6;roughness:0.9;repeat:1 1"></a-mixin>
+                    material="src:#marble-t;color:#b5b1a6;roughness:0.9;repeat:1 1" shadow="cast: true; receive: true"></a-mixin>
                 <a-entity position="0 5.6 20"><a-entity mixin="col-m"></a-entity><a-entity mixin="base-m"
                         position="0 -5 0"></a-entity><a-entity mixin="cap-m" position="0 5 0"></a-entity></a-entity>
                 <a-entity position="0 5.6 10"><a-entity mixin="col-m"></a-entity><a-entity mixin="base-m"
@@ -1994,14 +2155,66 @@
 
 
 
-            <!-- ARŞLI KAPI (ÜST KAT GEÇİŞİ) -->
+            <!-- ARŞLI KAPI (ÜST KAT GEÇİŞİ) - Güzelleştirilmiş Versiyon -->
             <a-entity id="faustina-gate-upper" position="22 0 83" rotation="0 0 0">
-                <a-box position="-4 3.5 0" width="1.2" height="7" depth="1.2"
-                    material="src:#marble-t; roughness:0.8"></a-box>
-                <a-box position="4 3.5 0" width="1.2" height="7" depth="1.2"
-                    material="src:#marble-t; roughness:0.8"></a-box>
-                <a-torus position="0 7.2 0" radius="4" radius-tubular="0.55" arc="180"
-                    material="src:#marble-t; roughness:0.8" scale="1 1 0.8"></a-torus>
+                <!-- Zemin Kaidesi (Platform) -->
+                <a-box position="0 0.1 0" width="12" height="0.2" depth="4"
+                    material="src:#stone-t; repeat: 4 1; roughness:0.9"></a-box>
+                <a-box position="0 0.3 0" width="11" height="0.2" depth="3.5"
+                    material="src:#stone-t; repeat: 4 1; roughness:0.9"></a-box>
+
+                <!-- Sol Sütun -->
+                <a-entity position="-4 0 0">
+                    <!-- Kaide (Base) -->
+                    <a-box width="1.8" height="0.7" depth="1.8" position="0 0.75 0"
+                        material="src:#stone-t; roughness:0.9"></a-box>
+                    <!-- Gövde (Shaft) -->
+                    <a-box width="1.2" height="6.6" depth="1.2" position="0 4.4 0"
+                        material="src:#marble-t; roughness:0.8"></a-box>
+                    <!-- Başlık (Capital) -->
+                    <a-box width="1.7" height="0.5" depth="1.7" position="0 7.7 0"
+                        material="src:#stone-t; roughness:0.7"></a-box>
+                </a-entity>
+
+                <!-- Sağ Sütun -->
+                <a-entity position="4 0 0">
+                    <!-- Kaide (Base) -->
+                    <a-box width="1.8" height="0.7" depth="1.8" position="0 0.75 0"
+                        material="src:#stone-t; roughness:0.9"></a-box>
+                    <!-- Gövde (Shaft) -->
+                    <a-box width="1.2" height="6.6" depth="1.2" position="0 4.4 0"
+                        material="src:#marble-t; roughness:0.8" shadow="cast: true; receive: true"></a-box>
+                    <!-- Başlık (Capital) -->
+                    <a-box width="1.7" height="0.5" depth="1.7" position="0 7.7 0"
+                        material="src:#stone-t; roughness:0.7"></a-box>
+                </a-entity>
+
+                <!-- Kemer Yapısı (Arch) -->
+                <a-entity position="0 7.9 0">
+                    <!-- Ana Kemer -->
+                    <a-torus radius="4" radius-tubular="0.65" arc="180" material="src:#marble-t; roughness:0.8"
+                        scale="1 1 0.9"></a-torus>
+
+                    <!-- Kilit Taşı (Keystone) -->
+                    <a-box width="1.5" height="1.8" depth="1.4" position="0 4.1 0"
+                        material="src:#stone-t; roughness:0.6" shadow></a-box>
+                    <a-text value="FAUSTINA" position="0 4.1 0.75" align="center" width="3" color="#e8c87a"
+                        font="cinzel"></a-text>
+
+                    <!-- Kemer Süsleme Hatları (Voussoir lines) -->
+                    <a-box width="0.05" height="1.4" depth="1.25" position="-2.8 2.8 0" rotation="0 0 45" color="#555"
+                        opacity="0.4" transparent="true"></a-box>
+                    <a-box width="0.05" height="1.4" depth="1.25" position="2.8 2.8 0" rotation="0 0 -45" color="#555"
+                        opacity="0.4" transparent="true"></a-box>
+                    <a-box width="0.05" height="1.4" depth="1.25" position="-4 0 0" rotation="0 0 90" color="#555"
+                        opacity="0.4" transparent="true"></a-box>
+                    <a-box width="0.05" height="1.4" depth="1.25" position="4 0 0" rotation="0 0 -90" color="#555"
+                        opacity="0.4" transparent="true"></a-box>
+                </a-entity>
+
+                <!-- Gölgelendirme (Subtle overlay for depth) -->
+                <a-plane position="0 0.41 0" rotation="-90 0 0" width="12" height="4" color="#000" opacity="0.2"
+                    transparent="true"></a-plane>
             </a-entity>
         </a-entity>
 
@@ -2115,15 +2328,40 @@
 
 
 
-        <a-light type="point" color="#e8a864" intensity="1.2" distance="40" position="0 4 35"></a-light>
-        <a-light type="point" color="#e8a864" intensity="1.2" distance="40" position="0 4 56"></a-light>
-        <a-light type="point" color="#e8a864" intensity="1.2" distance="40" position="0 4 75"></a-light>
-        <a-light type="point" color="#5ea8c9" intensity="0.5" distance="20" position="-8 3 56"></a-light>
+        <a-light type="point" color="#e8a864" intensity="40" distance="40" position="0 4 35"></a-light>
+        <a-light type="point" color="#e8a864" intensity="40" distance="40" position="0 4 56"></a-light>
+        <a-light type="point" color="#e8a864" intensity="40" distance="40" position="0 4 75"></a-light>
+        <a-light type="point" color="#5ea8c9" intensity="40" distance="20" position="-8 3 56"></a-light>
 
 
     </a-scene>
 
     <script>
+        // ============================================================
+        // BULUT HAREKET BİLEŞENİ (Cloud Drift Component)
+        // ============================================================
+        AFRAME.registerComponent('cloud-drift', {
+            schema: {
+                speed: { type: 'number', default: 1 },
+                range: { type: 'number', default: 30 },
+                offset: { type: 'number', default: 0 }
+            },
+            init: function () {
+                this.initialX = this.el.object3D.position.x;
+                this.time = this.data.offset;
+            },
+            tick: function (t, dt) {
+                // Süzülme hızı (Hızlı ama akıcı)
+                const moveAmount = dt / 1000 * this.data.speed * 2.5;
+                this.el.object3D.position.x += moveAmount;
+
+                // Ekranın/Sahnenin dışına çıkınca diğer taraftan başla (Infinite loop)
+                if (this.el.object3D.position.x > 250) {
+                    this.el.object3D.position.x = -250;
+                }
+            }
+        });
+
         // ============================================================
         // POI VERİLERİ
         // ============================================================
@@ -2361,10 +2599,10 @@
                 _v1.set(wx, wy, wz);
                 _v1.project(scene.camera);
                 if (_v1.z > 1) return null;
-                return { 
-                    x: (_v1.x * window.innerWidth / 2) + window.innerWidth / 2, 
-                    y: -(_v1.y * window.innerHeight / 2) + window.innerHeight / 2, 
-                    z: _v1.z 
+                return {
+                    x: (_v1.x * window.innerWidth / 2) + window.innerWidth / 2,
+                    y: -(_v1.y * window.innerHeight / 2) + window.innerHeight / 2,
+                    z: _v1.z
                 };
             } catch (e) { return null; }
         }
@@ -2409,9 +2647,9 @@
 
                 // Tam sıfırlama yaparak yeni dosya yükle
                 narratorAudio.pause();
-                narratorAudio.removeAttribute('src'); 
+                narratorAudio.removeAttribute('src');
                 narratorAudio.load();
-                
+
                 narratorAudio.src = poi.sound;
                 narratorAudio.load();
                 narratorAudio.muted = window.globalMuted;
@@ -2653,6 +2891,41 @@
             document.getElementById('sunset-overlay').style.opacity = m === 'sunset' ? '1' : '0';
             const sc = document.getElementById('stars-canvas');
             if (m === 'night') { sc.style.opacity = '1'; drawStars(); } else sc.style.opacity = '0';
+
+            // Güneş ve Ay Yönetimi
+            const sun = document.getElementById('sun');
+            const moon = document.getElementById('moon');
+            if (sun && moon) {
+                if (m === 'day') {
+                    sun.setAttribute('visible', true);
+                    sun.setAttribute('position', '0 150 0');
+                    moon.setAttribute('visible', false);
+                } else if (m === 'sunset') {
+                    sun.setAttribute('visible', true);
+                    sun.setAttribute('position', '250 35 -50');
+                    moon.setAttribute('visible', false);
+                } else if (m === 'night') {
+                    sun.setAttribute('visible', false);
+                    moon.setAttribute('visible', true);
+                    moon.setAttribute('position', '40 120 -60');
+                }
+            }
+
+            // Gece Aydınlatması Toggle
+            const nl = document.getElementById('night-lights');
+            if (nl) {
+                nl.setAttribute('visible', m === 'night');
+            }
+
+            // Bulut Renk Ayarı
+            const cc = document.getElementById('clouds-container');
+            if (cc) {
+                const cloudColor = { day: '#ffffff', sunset: '#ffc1a1', night: '#223344' }[m];
+                const cloudOpacity = { day: 0.35, sunset: 0.5, night: 0.15 }[m];
+                cc.querySelectorAll('[mixin="cloud-m"]').forEach(c => {
+                    c.setAttribute('material', `color: ${cloudColor}; opacity: ${cloudOpacity}`);
+                });
+            }
         }
 
         function setWeather(m) {
@@ -2660,6 +2933,12 @@
             document.getElementById('fog-overlay').style.opacity = m === 'fog' ? '1' : '0';
             const rc = document.getElementById('rain-canvas');
             if (m === 'rain') { rc.style.opacity = '1'; startRain(); } else { rc.style.opacity = '0'; stopRain(); }
+
+            // Bulut Görünürlük Ayarı
+            const cc = document.getElementById('clouds-container');
+            if (cc) {
+                cc.setAttribute('visible', m === 'clear');
+            }
         }
 
         function startRain() {
